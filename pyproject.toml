@@ -6,10 +6,13 @@ readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "bcrypt>=4.3.0",
+    "dotenv>=0.9.9",
     "fastapi>=0.115.13",
     "mysql-connector-python>=9.3.0",
     "openpyxl>=3.1.5",
     "pandas>=2.3.0",
+    "passlib>=1.7.4",
+    "pydantic[email]>=2.11.7",
     "python-jose[cryptography]>=3.5.0",
     "python-multipart[standard]>=0.0.20",
     "sqlalchemy>=2.0.41",

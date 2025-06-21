@@ -1,0 +1,86 @@
+from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from sqlalchemy.orm import Session
+from datetime import timedelta, datetime
+from typing import Annotated, Optional
+
+import app.models.models as models
+import app.schemas.schemas as schemas
+import app.crud.crud as crud
+from app.core.database import get_db
+from app.core.config import ACCESS_TOKEN_EXPIRE_MINUTES, ALGORITHM, SECRET_KEY
+from jose import JWTError, jwt
+
+router = APIRouter()
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+
+def authenticate_user(db: Session, username: str, password: str):
+    user = crud.get_user_by_sso_id(db, sso_id=username)
+    if not user or not crud.verify_password(password, user.hashed_password):
+        return False
+    return user
+
+def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
+    to_encode = data.copy()
+    if expires_delta:
+        expire = datetime.utcnow() + expires_delta
+    else:
+        expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    to_encode.update({"exp": expire})
+    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return encoded_jwt
+
+async def get_current_user(
+    token: Annotated[str, Depends(oauth2_scheme)], db: Annotated[Session, Depends(get_db)]
+):
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        sso_id: str = payload.get("sub")
+        if sso_id is None:
+            raise credentials_exception
+        token_data = schemas.TokenData(username=sso_id)
+    except JWTError:
+        raise credentials_exception
+    user = crud.get_user_by_sso_id(db, sso_id=token_data.username)
+    if user is None:
+        raise credentials_exception
+    return user
+
+def get_current_admin_user(current_user: Annotated[models.User, Depends(get_current_user)]):
+    if current_user.role != "Admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not authorized to perform this action. Admin access required."
+        )
+    return current_user
+
+@router.post("/token", response_model=schemas.Token)
+async def login_for_access_token(
+    form_data: Annotated[OAuth2PasswordRequestForm, Depends()], db: Annotated[Session, Depends(get_db)]
+):
+    user = authenticate_user(db, form_data.username, form_data.password)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(
+        data={"sub": user.sso_id}, expires_delta=access_token_expires
+    )
+    return {"access_token": access_token, "token_type": "bearer"}
+
+@router.get("/users/me/", response_model=schemas.UserResponse)
+async def read_users_me(current_user: Annotated[models.User, Depends(get_current_user)]):
+    return current_user
+
+@router.get("/admin/me/", response_model=schemas.UserResponse)
+async def read_admin_me(current_admin_user: Annotated[models.User, Depends(get_current_admin_user)]):
+    return current_admin_user
