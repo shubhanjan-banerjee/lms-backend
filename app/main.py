@@ -6,6 +6,7 @@ from app.core.db_check import check_database_connectivity
 from sqlalchemy.engine.url import make_url
 from app.api.routes import router as api_router
 from app.api.health import router as health_router
+from fastapi.middleware.cors import CORSMiddleware
 
 logger.debug("Starting LMS Backend API initialization...")
 
@@ -21,6 +22,19 @@ app = FastAPI(
     docs_url="/docs",
     redoc_url="/redoc",
     openapi_url="/openapi.json"
+)
+
+# CORS configuration
+origins = [
+    "*"  # Allow all origins. For production, specify allowed domains, e.g. ["https://your-frontend.com"]
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 logger.debug("Including API routers...")
