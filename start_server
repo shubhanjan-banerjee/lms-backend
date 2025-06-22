@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# Universal shortcut to start the FastAPI server
+cd "$(dirname "$0")"
+source .venv/bin/activate
+uvicorn app.main:app --reload

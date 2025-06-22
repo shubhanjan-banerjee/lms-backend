@@ -1,16 +1,23 @@
 -- SQL script to create the LMS database and user (run as MySQL root or admin)
 
--- If you want to create a dedicated user (recommended for production):
--- CREATE USER 'lms_user'@'%' IDENTIFIED BY 'your_password';
--- GRANT ALL PRIVILEGES ON lmsdb.* TO 'lms_user'@'%';
+-- This script will drop the existing database and user if they exist, then create a new database and user with the necessary privileges.
+-- DROP USER IF EXISTS 'lmsadmindbuser'@'localhost';
+-- DROP DATABASE IF EXISTS lmsdb;
+
+-- Create the LMS database and user
+-- CREATE DATABASE IF NOT EXISTS lmsdb;
+
+-- Create the user
+-- CREATE USER 'lmsadmindbuser'@'localhost' IDENTIFIED BY 'password1234';
+-- GRANT ALL PRIVILEGES ON lmsdb.* TO 'lmsadmindbuser'@'localhost';
 -- FLUSH PRIVILEGES;
 
--- To use with SQLAlchemy, ensure your .env DATABASE_URL is like:
--- mysql+mysqlconnector://lms_user:your_password@host:port/lmsdb;
+-- Ensure the user uses the mysql_native_password plugin for compatibility with SQLAlchemy
+-- ALTER USER 'lmsadmindbuser'@'localhost' IDENTIFIED WITH mysql_native_password BY 'password1234';
 
--- Create Database (Optional, if you want a new one)
--- CREATE DATABASE IF NOT EXISTS lms_db;
-CREATE DATABASE IF NOT EXISTS lmsdb DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+-- To use with SQLAlchemy, ensure your .env DATABASE_URL is like:
+-- mysql+mysqlconnector://lmsadmindbuser:password1234@host:port/lmsdb;
+
 USE lmsdb;
 
 -- Drop Tables in reverse order of dependency to avoid foreign key constraints issues
