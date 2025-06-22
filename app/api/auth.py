@@ -83,7 +83,16 @@ async def login_for_access_token(
 
 @router.get("/users/me/", response_model=schemas.UserResponse)
 async def read_users_me(current_user: Annotated[models.User, Depends(get_current_user)]):
-    return current_user
+    # Remove password from the dict before passing to UserResponse
+    user_dict = current_user.__dict__.copy()
+    user_dict.pop("hashed_password", None)
+    # Handle relationships for user_skills and current_project_role
+    user_dict["user_skills"] = [schemas.UserSkillResponse.model_validate(us, from_attributes=True) for us in getattr(current_user, "user_skills", [])]
+    if getattr(current_user, "project_role", None):
+        user_dict["current_project_role"] = schemas.ProjectRoleResponse.model_validate(current_user.project_role, from_attributes=True)
+    else:
+        user_dict["current_project_role"] = None
+    return schemas.UserResponse(**user_dict)
 
 @router.get("/admin/me/", response_model=schemas.UserResponse)
 async def read_admin_me(current_admin_user: Annotated[models.User, Depends(get_current_admin_user)]):
