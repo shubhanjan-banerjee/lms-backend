@@ -1,16 +1,23 @@
 -- SQL script to create the LMS database and user (run as MySQL root or admin)
 
--- If you want to create a dedicated user (recommended for production):
--- CREATE USER 'lms_user'@'%' IDENTIFIED BY 'your_password';
--- GRANT ALL PRIVILEGES ON lmsdb.* TO 'lms_user'@'%';
+-- This script will drop the existing database and user if they exist, then create a new database and user with the necessary privileges.
+-- DROP USER IF EXISTS 'lmsadmindbuser'@'localhost';
+-- DROP DATABASE IF EXISTS lmsdb;
+
+-- Create the LMS database and user
+-- CREATE DATABASE IF NOT EXISTS lmsdb;
+
+-- Create the user
+-- CREATE USER 'lmsadmindbuser'@'localhost' IDENTIFIED BY 'password1234';
+-- GRANT ALL PRIVILEGES ON lmsdb.* TO 'lmsadmindbuser'@'localhost';
 -- FLUSH PRIVILEGES;
 
--- To use with SQLAlchemy, ensure your .env DATABASE_URL is like:
--- mysql+mysqlconnector://lms_user:your_password@host:port/lmsdb;
+-- Ensure the user uses the mysql_native_password plugin for compatibility with SQLAlchemy
+-- ALTER USER 'lmsadmindbuser'@'localhost' IDENTIFIED WITH mysql_native_password BY 'password1234';
 
--- Create Database (Optional, if you want a new one)
--- CREATE DATABASE IF NOT EXISTS lms_db;
-CREATE DATABASE IF NOT EXISTS lmsdb DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+-- To use with SQLAlchemy, ensure your .env DATABASE_URL is like:
+-- mysql+mysqlconnector://lmsadmindbuser:password1234@host:port/lmsdb;
+
 USE lmsdb;
 
 -- Drop Tables in reverse order of dependency to avoid foreign key constraints issues
@@ -237,16 +244,16 @@ INSERT INTO project_roles (id, name, description) VALUES
 -- For simplicity in this script, we'll use a placeholder.
 -- In a real scenario, you'd generate these hashes programmatically.
 INSERT INTO users (id, sso_id, email, first_name, last_name, hashed_password, role, current_project_role_id) VALUES
-(1, 'admin.user1', 'admin1@example.com', 'Alice', 'Admin', '$2b$12$s0m3h4shf0r4dm1np4ssw0rd.s0me0th3rch4rs', 'Admin', NULL), -- Placeholder hash
-(2, 'admin.user2', 'admin2@example.com', 'Bob', 'Admin', '$2b$12$s0m3h4shf0r4dm1np4ssw0rd.s0me0th3rch4rs', 'Admin', NULL), -- Placeholder hash
-(3, 'dev.john', 'john.doe@example.com', 'John', 'Doe', '$2b$12$s0m3h4shf0r4dm1np4ssw0rd.s0me0th3rch4rs', 'Developer', (SELECT id FROM project_roles WHERE name = 'Frontend Developer')),
-(4, 'dev.jane', 'jane.smith@example.com', 'Jane', 'Smith', '$2b$12$s0m3h4shf0r4dm1np4ssw0rd.s0me0th3rch4rs', 'Developer', (SELECT id FROM project_roles WHERE name = 'Backend Developer')),
-(5, 'dev.peter', 'peter.jones@example.com', 'Peter', 'Jones', '$2b$12$s0m3h4shf0r4dm1np4ssw0rd.s0me0th3rch4rs', 'Developer', (SELECT id FROM project_roles WHERE name = 'Fullstack Developer')),
-(6, 'dev.mary', 'mary.brown@example.com', 'Mary', 'Brown', '$2b$12$s0m3h4shf0r4dm1np4ssw0rd.s0me0th3rch4rs', 'Developer', (SELECT id FROM project_roles WHERE name = 'DevOps Engineer')),
-(7, 'dev.chris', 'chris.green@example.com', 'Chris', 'Green', '$2b$12$s0m3h4shf0r4dm1np4ssw0rd.s0me0th3rch4rs', 'Developer', (SELECT id FROM project_roles WHERE name = 'Data Scientist')),
-(8, 'dev.sara', 'sara.white@example.com', 'Sara', 'White', '$2b$12$s0m3h4shf0r4dm1np4ssw0rd.s0me0th3rch4rs', 'Developer', (SELECT id FROM project_roles WHERE name = 'Frontend Developer')),
-(9, 'dev.mike', 'mike.black@example.com', 'Mike', 'Black', '$2b$12$s0m3h4shf0r4dm1np4ssw0rd.s0me0th3rch4rs', 'Developer', (SELECT id FROM project_roles WHERE name = 'Backend Developer')),
-(10, 'dev.lisa', 'lisa.taylor@example.com', 'Lisa', 'Taylor', '$2b$12$s0m3h4shf0r4dm1np4ssw0rd.s0me0th3rch4rs', 'Developer', (SELECT id FROM project_roles WHERE name = 'Fullstack Developer'));
+(1, 'admin.user1', 'admin1@example.com', 'Alice', 'Admin', '$2b$12$3VBeecTx8i3615P4ylGc8.Q4SndKNZ0MZ3GzwctHeOPR45QuEO58i', 'Admin', NULL), -- Placeholder hash
+(2, 'admin.user2', 'admin2@example.com', 'Bob', 'Admin', '$2b$12$3VBeecTx8i3615P4ylGc8.Q4SndKNZ0MZ3GzwctHeOPR45QuEO58i', 'Admin', NULL), -- Placeholder hash
+(3, 'dev.john', 'john.doe@example.com', 'John', 'Doe', '$2b$12$3VBeecTx8i3615P4ylGc8.Q4SndKNZ0MZ3GzwctHeOPR45QuEO58i', 'Developer', (SELECT id FROM project_roles WHERE name = 'Frontend Developer')),
+(4, 'dev.jane', 'jane.smith@example.com', 'Jane', 'Smith', '$2b$12$3VBeecTx8i3615P4ylGc8.Q4SndKNZ0MZ3GzwctHeOPR45QuEO58i', 'Developer', (SELECT id FROM project_roles WHERE name = 'Backend Developer')),
+(5, 'dev.peter', 'peter.jones@example.com', 'Peter', 'Jones', '$2b$12$3VBeecTx8i3615P4ylGc8.Q4SndKNZ0MZ3GzwctHeOPR45QuEO58i', 'Developer', (SELECT id FROM project_roles WHERE name = 'Fullstack Developer')),
+(6, 'dev.mary', 'mary.brown@example.com', 'Mary', 'Brown', '$2b$12$3VBeecTx8i3615P4ylGc8.Q4SndKNZ0MZ3GzwctHeOPR45QuEO58i', 'Developer', (SELECT id FROM project_roles WHERE name = 'DevOps Engineer')),
+(7, 'dev.chris', 'chris.green@example.com', 'Chris', 'Green', '$2b$12$3VBeecTx8i3615P4ylGc8.Q4SndKNZ0MZ3GzwctHeOPR45QuEO58i', 'Developer', (SELECT id FROM project_roles WHERE name = 'Data Scientist')),
+(8, 'dev.sara', 'sara.white@example.com', 'Sara', 'White', '$2b$12$3VBeecTx8i3615P4ylGc8.Q4SndKNZ0MZ3GzwctHeOPR45QuEO58i', 'Developer', (SELECT id FROM project_roles WHERE name = 'Frontend Developer')),
+(9, 'dev.mike', 'mike.black@example.com', 'Mike', 'Black', '$2b$12$3VBeecTx8i3615P4ylGc8.Q4SndKNZ0MZ3GzwctHeOPR45QuEO58i', 'Developer', (SELECT id FROM project_roles WHERE name = 'Backend Developer')),
+(10, 'dev.lisa', 'lisa.taylor@example.com', 'Lisa', 'Taylor', '$2b$12$3VBeecTx8i3615P4ylGc8.Q4SndKNZ0MZ3GzwctHeOPR45QuEO58i', 'Developer', (SELECT id FROM project_roles WHERE name = 'Fullstack Developer'));
 
 -- User Skills (Many entries to demonstrate various skills for users)
 INSERT INTO user_skills (id, user_id, skill_id, proficiency_level_id) VALUES

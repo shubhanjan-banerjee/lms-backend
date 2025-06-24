@@ -2,9 +2,13 @@ from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey, T
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from app.core.database import Base
+import logging
+
+logger = logging.getLogger("lms_backend.models")
 
 class User(Base):
     __tablename__ = "users"
+    # logger.debug("Defining User model.")
     id = Column(Integer, primary_key=True, index=True)
     sso_id = Column(String(255), unique=True, index=True, nullable=False)
     email = Column(String(255), unique=True, index=True, nullable=False)
@@ -24,6 +28,7 @@ class User(Base):
 
 class Skill(Base):
     __tablename__ = "skills"
+    # logger.debug("Defining Skill model.")
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(255), unique=True, index=True, nullable=False)
     description = Column(Text, nullable=True)
@@ -34,12 +39,14 @@ class Skill(Base):
 
 class ProficiencyLevel(Base):
     __tablename__ = "proficiency_levels"
+    # logger.debug("Defining ProficiencyLevel model.")
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(50), unique=True, nullable=False)
     description = Column(Text, nullable=True)
 
 class ProjectRole(Base):
     __tablename__ = "project_roles"
+    # logger.debug("Defining ProjectRole model.")
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(255), unique=True, nullable=False)
     description = Column(Text, nullable=True)
@@ -49,6 +56,7 @@ class ProjectRole(Base):
 
 class UserSkill(Base):
     __tablename__ = "user_skills"
+    # logger.debug("Defining UserSkill model.")
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     skill_id = Column(Integer, ForeignKey("skills.id"), nullable=False)
@@ -61,6 +69,7 @@ class UserSkill(Base):
 
 class RoleSkillRequirement(Base):
     __tablename__ = "role_skill_requirements"
+    # logger.debug("Defining RoleSkillRequirement model.")
     id = Column(Integer, primary_key=True, index=True)
     project_role_id = Column(Integer, ForeignKey("project_roles.id"), nullable=False)
     skill_id = Column(Integer, ForeignKey("skills.id"), nullable=False)
@@ -73,6 +82,7 @@ class RoleSkillRequirement(Base):
 
 class Course(Base):
     __tablename__ = "courses"
+    # logger.debug("Defining Course model.")
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(255), unique=True, nullable=False)
     description = Column(Text, nullable=True)
@@ -89,6 +99,7 @@ class Course(Base):
 
 class LearningPath(Base):
     __tablename__ = "learning_paths"
+    # logger.debug("Defining LearningPath model.")
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(255), unique=True, nullable=False)
     description = Column(Text, nullable=True)
@@ -98,6 +109,7 @@ class LearningPath(Base):
 
 class LearningPathCourse(Base):
     __tablename__ = "learning_path_courses"
+    # logger.debug("Defining LearningPathCourse model.")
     id = Column(Integer, primary_key=True, index=True)
     learning_path_id = Column(Integer, ForeignKey("learning_paths.id"), nullable=False)
     course_id = Column(Integer, ForeignKey("courses.id"), nullable=False)
@@ -108,6 +120,7 @@ class LearningPathCourse(Base):
 
 class UserLearningPath(Base):
     __tablename__ = "user_learning_paths"
+    # logger.debug("Defining UserLearningPath model.")
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     learning_path_id = Column(Integer, ForeignKey("learning_paths.id"), nullable=False)
@@ -122,6 +135,7 @@ class UserLearningPath(Base):
 
 class UserCourseProgress(Base):
     __tablename__ = "user_course_progress"
+    # logger.debug("Defining UserCourseProgress model.")
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     course_id = Column(Integer, ForeignKey("courses.id"), nullable=False)
@@ -135,6 +149,7 @@ class UserCourseProgress(Base):
 
 class AuditLog(Base):
     __tablename__ = "audit_logs"
+    # logger.debug("Defining AuditLog model.")
     id = Column(Integer, primary_key=True, index=True)
     admin_user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     action = Column(String(255), nullable=False)
