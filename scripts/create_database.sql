@@ -244,16 +244,16 @@ INSERT INTO project_roles (id, name, description) VALUES
 -- For simplicity in this script, we'll use a placeholder.
 -- In a real scenario, you'd generate these hashes programmatically.
 INSERT INTO users (id, sso_id, email, first_name, last_name, hashed_password, role, current_project_role_id) VALUES
-(1, 'admin.user1', 'admin1@example.com', 'Alice', 'Admin', '$2b$12$s0m3h4shf0r4dm1np4ssw0rd.s0me0th3rch4rs', 'Admin', NULL), -- Placeholder hash
-(2, 'admin.user2', 'admin2@example.com', 'Bob', 'Admin', '$2b$12$s0m3h4shf0r4dm1np4ssw0rd.s0me0th3rch4rs', 'Admin', NULL), -- Placeholder hash
-(3, 'dev.john', 'john.doe@example.com', 'John', 'Doe', '$2b$12$s0m3h4shf0r4dm1np4ssw0rd.s0me0th3rch4rs', 'Developer', (SELECT id FROM project_roles WHERE name = 'Frontend Developer')),
-(4, 'dev.jane', 'jane.smith@example.com', 'Jane', 'Smith', '$2b$12$s0m3h4shf0r4dm1np4ssw0rd.s0me0th3rch4rs', 'Developer', (SELECT id FROM project_roles WHERE name = 'Backend Developer')),
-(5, 'dev.peter', 'peter.jones@example.com', 'Peter', 'Jones', '$2b$12$s0m3h4shf0r4dm1np4ssw0rd.s0me0th3rch4rs', 'Developer', (SELECT id FROM project_roles WHERE name = 'Fullstack Developer')),
-(6, 'dev.mary', 'mary.brown@example.com', 'Mary', 'Brown', '$2b$12$s0m3h4shf0r4dm1np4ssw0rd.s0me0th3rch4rs', 'Developer', (SELECT id FROM project_roles WHERE name = 'DevOps Engineer')),
-(7, 'dev.chris', 'chris.green@example.com', 'Chris', 'Green', '$2b$12$s0m3h4shf0r4dm1np4ssw0rd.s0me0th3rch4rs', 'Developer', (SELECT id FROM project_roles WHERE name = 'Data Scientist')),
-(8, 'dev.sara', 'sara.white@example.com', 'Sara', 'White', '$2b$12$s0m3h4shf0r4dm1np4ssw0rd.s0me0th3rch4rs', 'Developer', (SELECT id FROM project_roles WHERE name = 'Frontend Developer')),
-(9, 'dev.mike', 'mike.black@example.com', 'Mike', 'Black', '$2b$12$s0m3h4shf0r4dm1np4ssw0rd.s0me0th3rch4rs', 'Developer', (SELECT id FROM project_roles WHERE name = 'Backend Developer')),
-(10, 'dev.lisa', 'lisa.taylor@example.com', 'Lisa', 'Taylor', '$2b$12$s0m3h4shf0r4dm1np4ssw0rd.s0me0th3rch4rs', 'Developer', (SELECT id FROM project_roles WHERE name = 'Fullstack Developer'));
+(1, 'admin.user1', 'admin1@example.com', 'Alice', 'Admin', '$2b$12$3VBeecTx8i3615P4ylGc8.Q4SndKNZ0MZ3GzwctHeOPR45QuEO58i', 'Admin', NULL), -- Placeholder hash
+(2, 'admin.user2', 'admin2@example.com', 'Bob', 'Admin', '$2b$12$3VBeecTx8i3615P4ylGc8.Q4SndKNZ0MZ3GzwctHeOPR45QuEO58i', 'Admin', NULL), -- Placeholder hash
+(3, 'dev.john', 'john.doe@example.com', 'John', 'Doe', '$2b$12$3VBeecTx8i3615P4ylGc8.Q4SndKNZ0MZ3GzwctHeOPR45QuEO58i', 'Developer', (SELECT id FROM project_roles WHERE name = 'Frontend Developer')),
+(4, 'dev.jane', 'jane.smith@example.com', 'Jane', 'Smith', '$2b$12$3VBeecTx8i3615P4ylGc8.Q4SndKNZ0MZ3GzwctHeOPR45QuEO58i', 'Developer', (SELECT id FROM project_roles WHERE name = 'Backend Developer')),
+(5, 'dev.peter', 'peter.jones@example.com', 'Peter', 'Jones', '$2b$12$3VBeecTx8i3615P4ylGc8.Q4SndKNZ0MZ3GzwctHeOPR45QuEO58i', 'Developer', (SELECT id FROM project_roles WHERE name = 'Fullstack Developer')),
+(6, 'dev.mary', 'mary.brown@example.com', 'Mary', 'Brown', '$2b$12$3VBeecTx8i3615P4ylGc8.Q4SndKNZ0MZ3GzwctHeOPR45QuEO58i', 'Developer', (SELECT id FROM project_roles WHERE name = 'DevOps Engineer')),
+(7, 'dev.chris', 'chris.green@example.com', 'Chris', 'Green', '$2b$12$3VBeecTx8i3615P4ylGc8.Q4SndKNZ0MZ3GzwctHeOPR45QuEO58i', 'Developer', (SELECT id FROM project_roles WHERE name = 'Data Scientist')),
+(8, 'dev.sara', 'sara.white@example.com', 'Sara', 'White', '$2b$12$3VBeecTx8i3615P4ylGc8.Q4SndKNZ0MZ3GzwctHeOPR45QuEO58i', 'Developer', (SELECT id FROM project_roles WHERE name = 'Frontend Developer')),
+(9, 'dev.mike', 'mike.black@example.com', 'Mike', 'Black', '$2b$12$3VBeecTx8i3615P4ylGc8.Q4SndKNZ0MZ3GzwctHeOPR45QuEO58i', 'Developer', (SELECT id FROM project_roles WHERE name = 'Backend Developer')),
+(10, 'dev.lisa', 'lisa.taylor@example.com', 'Lisa', 'Taylor', '$2b$12$3VBeecTx8i3615P4ylGc8.Q4SndKNZ0MZ3GzwctHeOPR45QuEO58i', 'Developer', (SELECT id FROM project_roles WHERE name = 'Fullstack Developer'));
 
 -- User Skills (Many entries to demonstrate various skills for users)
 INSERT INTO user_skills (id, user_id, skill_id, proficiency_level_id) VALUES
