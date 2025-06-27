@@ -21,10 +21,10 @@ class User(Base):
     last_login = Column(DateTime(timezone=True), onupdate=func.now())
 
     project_role = relationship("ProjectRole", back_populates="users")
-    user_skills = relationship("UserSkill", back_populates="user")
-    user_learning_paths = relationship("UserLearningPath", back_populates="user")
-    user_course_progress = relationship("UserCourseProgress", back_populates="user")
-    audit_logs = relationship("AuditLog", back_populates="admin_user")
+    user_skills = relationship("UserSkill", back_populates="user", cascade="all, delete-orphan")
+    user_learning_paths = relationship("UserLearningPath", back_populates="user", cascade="all, delete-orphan")
+    user_course_progress = relationship("UserCourseProgress", back_populates="user", cascade="all, delete-orphan")
+    audit_logs = relationship("AuditLog", back_populates="admin_user", cascade="all, delete-orphan")
 
 class Skill(Base):
     __tablename__ = "skills"
