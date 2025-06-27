@@ -48,7 +48,13 @@ def calculate_proficiency(role: str, skill: str) -> List[Dict[str, int]]:
 def process_developers_excel(file_path: str) -> List[Dict[str, Any]]:
     try:
         df = convert_excel_to_dataframe(file_path)
-        required_columns = ['Associate Id', 'Associate Name', 'Project Role', 'Skill Requirement']
+        required_columns = [
+            'Employee ID',	
+            'Employee First Name',	
+            'Employee Last Name',	
+            'Project Role',	
+            'Skill Requirement'
+        ]
         missing_columns = [col for col in required_columns if col not in df.columns]
         if missing_columns:
             error_msg = f"Error: Missing required columns in Excel file: {', '.join(missing_columns)}"
@@ -56,12 +62,13 @@ def process_developers_excel(file_path: str) -> List[Dict[str, Any]]:
         employees = []
         for _, row in df.iterrows():
             emp = {
-                "associateId": row.get('Associate Id', ''),
-                "associateName": row.get('Associate Name', ''),
-                "projectRole": row.get('Project Role', ''),
-                "skillRequirement": row.get('Skill Requirement', ''),
-                "proficiency": calculate_proficiency(row.get('Project Role', ''), row.get('Skill Requirement', ''))
+                "sso_id": row.get('Employee ID', ''),
+                "first_name": row.get('Employee First Name', ''),
+                "last_name": row.get('Employee Last Name', ''),
+                "project_role": row.get('Project Role', ''),
+                "skill_name": row.get('Skill Requirement', '')
             }
+                # "proficiency": calculate_proficiency(row.get('Project Role', ''), row.get('Skill Requirement', ''))
             employees.append(emp)
         return employees
     except Exception as e:
@@ -72,3 +79,68 @@ def convert_excel_to_dataframe(file_path: str):
         return pd.read_excel(file_path)
     except Exception as e:
         raise Exception(f"Failed to read Excel file: {str(e)}")
+
+def process_employees_excel_and_insert(file_path: str, db):
+    import app.crud.crud as crud
+    from sqlalchemy.exc import SQLAlchemyError
+    df = convert_excel_to_dataframe(file_path)
+    required_columns = [
+        'Employee ID', 'Employee First Name', 'Employee Last Name', 'Email ID', 'Project Role', 'Skill Requirement'
+    ]
+    missing_columns = [col for col in required_columns if col not in df.columns]
+    summary = {"created": [], "updated": [], "errors": []}
+    if missing_columns:
+        return {"error": f"Missing required columns: {', '.join(missing_columns)}"}
+    for _, row in df.iterrows():
+        try:
+            sso_id = str(row.get('Employee ID', '')).strip()
+            first_name = str(row.get('Employee First Name', '')).strip()
+            last_name = str(row.get('Employee Last Name', '')).strip()
+            email = str(row.get('Email ID', '')).strip()
+            project_role_name = str(row.get('Project Role', '')).strip()
+            skill_names = str(row.get('Skill Requirement', '')).strip().split(',')
+            skill_names = [s.strip() for s in skill_names if s.strip()]
+            # Map project role
+            project_role = crud.get_project_role_by_name(db, project_role_name)
+            if not project_role:
+                summary["errors"].append(f"Project role '{project_role_name}' not found for {sso_id}")
+                continue
+            # Check if user exists
+            user = crud.get_user_by_sso_id(db, sso_id)
+            if not user:
+                user_data = type('UserObj', (), {})()
+                user_data.sso_id = sso_id
+                user_data.email = email
+                user_data.first_name = first_name
+                user_data.last_name = last_name
+                user_data.password = 'password123'
+                user_data.current_project_role_id = project_role.id
+                user = crud.create_user_with_role(db, user_data)
+                summary["created"].append(sso_id)
+            else:
+                if user.current_project_role_id != project_role.id:
+                    user.current_project_role_id = project_role.id
+                    db.add(user)
+                    db.commit()
+                summary["updated"].append(sso_id)
+            # For each skill
+            for skill_name in skill_names:
+                skill = crud.get_skill_by_name(db, skill_name)
+                if not skill:
+                    summary["errors"].append(f"Skill '{skill_name}' not found for {sso_id}")
+                    continue
+                # Proficiency evaluation
+                from app.services.developer_processing import calculate_proficiency
+                proficiencies = calculate_proficiency(project_role_name, skill_name)
+                for prof in proficiencies:
+                    if prof["technology"].lower() == skill_name.lower():
+                        proficiency_level = crud.get_proficiency_level_by_level(db, prof["proficiencyLevel"])
+                        if not proficiency_level:
+                            summary["errors"].append(f"Proficiency level '{prof['proficiencyLevel']}' not found for {sso_id}")
+                            continue
+                        crud.upsert_user_skill(db, user.id, skill.id, proficiency_level.id)
+        except SQLAlchemyError as e:
+            summary["errors"].append(f"DB error for {sso_id}: {str(e)}")
+        except Exception as e:
+            summary["errors"].append(f"General error for {sso_id}: {str(e)}")
+    return summary

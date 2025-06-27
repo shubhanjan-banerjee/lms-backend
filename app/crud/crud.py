@@ -93,4 +93,42 @@ def create_skill(db: Session, skill: schemas.SkillCreate):
     db.commit()
     db.refresh(db_skill)
     return db_skill
+
+def get_project_role_by_name(db: Session, role_name: str):
+    logger.debug(f"Fetching project role by name: {role_name}")
+    return db.query(models.ProjectRole).filter(models.ProjectRole.name == role_name).first()
+
+def get_proficiency_level_by_level(db: Session, level: int):
+    logger.debug(f"Fetching proficiency level by level: {level}")
+    return db.query(models.ProficiencyLevel).filter(models.ProficiencyLevel.id == level).first()
+
+def create_user_with_role(db: Session, user):
+    logger.debug(f"Creating user with role: {user.email}")
+    hashed_password = hash_password(user.password)
+    db_user = models.User(
+        sso_id=user.sso_id,
+        email=user.email,
+        first_name=user.first_name,
+        last_name=user.last_name,
+        hashed_password=hashed_password,
+        role="Developer",
+        current_project_role_id=user.current_project_role_id
+    )
+    db.add(db_user)
+    db.commit()
+    db.refresh(db_user)
+    return db_user
+
+def upsert_user_skill(db: Session, user_id: int, skill_id: int, proficiency_level_id: int):
+    logger.debug(f"Upserting user skill: user_id={user_id}, skill_id={skill_id}, proficiency_level_id={proficiency_level_id}")
+    user_skill = db.query(models.UserSkill).filter_by(user_id=user_id, skill_id=skill_id).first()
+    if user_skill:
+        user_skill.proficiency_level_id = proficiency_level_id
+        db.add(user_skill)
+    else:
+        user_skill = models.UserSkill(user_id=user_id, skill_id=skill_id, proficiency_level_id=proficiency_level_id)
+        db.add(user_skill)
+    db.commit()
+    db.refresh(user_skill)
+    return user_skill
 # ... Copilot should implement CRUD for other models (ProficiencyLevel, ProjectRole, UserSkill, RoleSkillRequirement, Course, LearningPath, LearningPathCourse, UserLearningPath, UserCourseProgress, AuditLog)

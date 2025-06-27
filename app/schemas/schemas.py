@@ -204,9 +204,12 @@ class RoleSkillRequirementResponse(RoleSkillRequirementBase):
     class Config:
         from_attributes = True
 
-class UserResponse(UserCreate):
+class UserResponse(BaseModel):
     id: int
     sso_id: str
+    email: EmailStr
+    first_name: str
+    last_name: str
     role: str
     current_project_role: Optional[ProjectRoleResponse] = None
     date_joined: datetime
