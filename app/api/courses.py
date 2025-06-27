@@ -1,10 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from typing import List
 import app.models.models as models
 import app.schemas.schemas as schemas
 import app.crud.crud as crud
 from app.core.database import get_db
+from app.schemas.schemas import PaginatedResponse
 
 router = APIRouter(prefix="/courses", tags=["courses"])
 
@@ -13,7 +15,7 @@ def create_course(course: schemas.CourseCreate, db: Session = Depends(get_db)):
     db_course = crud.create_course(db, course)
     return db_course
 
-@router.get("/", response_model=List[schemas.CourseResponse])
+@router.get("/", response_model=PaginatedResponse[schemas.CourseResponse])
 def get_courses(
     skip: int = 0,
     limit: int = 100,
@@ -22,7 +24,9 @@ def get_courses(
     sort_order: str = Query("asc", description="Sort order: asc or desc"),
     db: Session = Depends(get_db)
 ):
-    return crud.get_courses(db, skip=skip, limit=limit, search=search, sort_by=sort_by, sort_order=sort_order)
+    total = crud.count_courses(db, search=search)
+    items = crud.get_courses(db, skip=skip, limit=limit, search=search, sort_by=sort_by, sort_order=sort_order)
+    return {"total": total, "items": items}
 
 @router.get("/{course_id}", response_model=schemas.CourseResponse)
 def get_course(course_id: int, db: Session = Depends(get_db)):

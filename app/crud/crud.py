@@ -94,9 +94,28 @@ def get_skill(db: Session, skill_id: int):
     logger.debug(f"Fetching skill by ID: {skill_id}")
     return db.query(models.Skill).filter(models.Skill.id == skill_id).first()
 
-def get_skills(db: Session, skip: int = 0, limit: int = 100):
-    logger.debug(f"Fetching skills with skip={skip}, limit={limit}")
-    return db.query(models.Skill).offset(skip).limit(limit).all()
+def get_skills(db: Session, skip: int = 0, limit: int = 100, search=None, sort_by="id", sort_order="asc"):
+    logger.debug(f"Fetching skills with skip={skip}, limit={limit}, search={search}, sort_by={sort_by}, sort_order={sort_order}")
+    query = db.query(models.Skill)
+    if search:
+        query = query.filter(
+            (models.Skill.name.ilike(f"%{search}%")) |
+            (models.Skill.description.ilike(f"%{search}%"))
+        )
+    if sort_order == "desc":
+        query = query.order_by(getattr(models.Skill, sort_by).desc())
+    else:
+        query = query.order_by(getattr(models.Skill, sort_by).asc())
+    return query.offset(skip).limit(limit).all()
+
+def count_skills(db, search=None):
+    query = db.query(models.Skill)
+    if search:
+        query = query.filter(
+            (models.Skill.name.ilike(f"%{search}%")) |
+            (models.Skill.description.ilike(f"%{search}%"))
+        )
+    return query.count()
 
 def create_skill(db: Session, skill: schemas.SkillCreate):
     logger.debug(f"Creating skill: {skill.name}")
@@ -187,6 +206,15 @@ def delete_course(db, course_id: int):
     db.commit()
     return db_course
 
+def count_courses(db, search=None):
+    query = db.query(models.Course)
+    if search:
+        query = query.filter(
+            (models.Course.name.ilike(f"%{search}%")) |
+            (models.Course.description.ilike(f"%{search}%"))
+        )
+    return query.count()
+
 # LEARNING PATH CRUD
 
 def create_learning_path_with_courses(db, lp: schemas.LearningPathCreate):
@@ -257,3 +285,23 @@ def delete_learning_path(db, learning_path_id: int):
     db.delete(db_lp)
     db.commit()
     return db_lp
+
+def count_learning_paths(db, search=None):
+    query = db.query(models.LearningPath)
+    if search:
+        query = query.filter(
+            (models.LearningPath.name.ilike(f"%{search}%")) |
+            (models.LearningPath.description.ilike(f"%{search}%"))
+        )
+    return query.count()
+
+def count_users(db, search=None):
+    query = db.query(models.User)
+    if search:
+        query = query.filter(
+            (models.User.first_name.ilike(f"%{search}%")) |
+            (models.User.last_name.ilike(f"%{search}%")) |
+            (models.User.email.ilike(f"%{search}%")) |
+            (models.User.sso_id.ilike(f"%{search}%"))
+        )
+    return query.count()

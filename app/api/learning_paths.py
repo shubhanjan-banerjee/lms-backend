@@ -1,10 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, Body
+from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from typing import List
 import app.models.models as models
 import app.schemas.schemas as schemas
 import app.crud.crud as crud
 from app.core.database import get_db
+from app.schemas.schemas import PaginatedResponse
 
 router = APIRouter(prefix="/learning-paths", tags=["learning-paths"])
 
@@ -13,7 +15,7 @@ def create_learning_path(lp: schemas.LearningPathCreate, db: Session = Depends(g
     db_lp = crud.create_learning_path_with_courses(db, lp)
     return db_lp
 
-@router.get("/", response_model=List[schemas.LearningPathResponse])
+@router.get("/", response_model=PaginatedResponse[schemas.LearningPathResponse])
 def get_learning_paths(
     skip: int = 0,
     limit: int = 100,
@@ -22,8 +24,9 @@ def get_learning_paths(
     sort_order: str = Query("asc", description="Sort order: asc or desc"),
     db: Session = Depends(get_db)
 ):
+    total = crud.count_learning_paths(db, search=search)
     lps = crud.get_learning_paths_with_details(db, skip=skip, limit=limit, search=search, sort_by=sort_by, sort_order=sort_order)
-    return lps
+    return {"total": total, "items": lps}
 
 @router.get("/{learning_path_id}", response_model=schemas.LearningPathResponse)
 def get_learning_path(learning_path_id: int, db: Session = Depends(get_db)):

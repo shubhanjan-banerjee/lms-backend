@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from typing import List, Annotated
 import app.models.models as models
@@ -6,13 +7,14 @@ import app.schemas.schemas as schemas
 import app.crud.crud as crud
 from app.api.auth import get_current_admin_user
 from app.core.database import get_db
+from app.schemas.schemas import PaginatedResponse
 import logging
 
 logger = logging.getLogger("lms_backend.api.users")
 
 router = APIRouter(prefix="/admin/users", tags=["admin-users"])
 
-@router.get("/", response_model=List[schemas.UserResponse])
+@router.get("/", response_model=PaginatedResponse[schemas.UserResponse])
 async def read_all_users(
     db: Annotated[Session, Depends(get_db)],
     current_admin_user: Annotated[models.User, Depends(get_current_admin_user)],
@@ -24,6 +26,7 @@ async def read_all_users(
 ):
     logger.debug("Fetching all users with cascading details.")
     try:
+        total = crud.count_users(db, search=search)
         users = crud.get_users(db, skip=skip, limit=limit, search=search, sort_by=sort_by, sort_order=sort_order)
         user_list = []
         for user in users:
@@ -65,7 +68,7 @@ async def read_all_users(
                 user_dict["user_course_progress"].append(cp_dict)
             user_list.append(user_dict)
         logger.info(f"Fetched {len(user_list)} users with cascading details.")
-        return user_list
+        return {"total": total, "items": user_list}
     except Exception as e:
         logger.error(f"Error fetching users: {e}")
         raise

@@ -1,9 +1,17 @@
 from pydantic import BaseModel, EmailStr
 from typing import List, Optional, TYPE_CHECKING, ForwardRef
 from datetime import datetime
+from typing import Generic, TypeVar, List, Optional
+from pydantic.generics import GenericModel
 
 UserLearningPathResponse = ForwardRef('UserLearningPathResponse')
 UserCourseProgressResponse = ForwardRef('UserCourseProgressResponse')
+
+T = TypeVar("T")
+
+class PaginatedResponse(GenericModel, Generic[T]):
+    total: int
+    items: List[T]
 
 class Token(BaseModel):
     access_token: str
