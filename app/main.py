@@ -6,6 +6,7 @@ from app.core.db_check import check_database_connectivity
 from sqlalchemy.engine.url import make_url
 from app.api.routes import router as api_router
 from app.api.health import router as health_router
+from app.api.ai_chat import router as ai_chat_router
 from fastapi.middleware.cors import CORSMiddleware
 
 logger.debug("Starting LMS Backend API initialization...")
@@ -40,6 +41,7 @@ app.add_middleware(
 logger.debug("Including API routers...")
 app.include_router(health_router)
 app.include_router(api_router)
+app.include_router(ai_chat_router)
 logger.debug("All routers included.")
 
 def start():

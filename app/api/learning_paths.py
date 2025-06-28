@@ -7,6 +7,7 @@ import app.schemas.schemas as schemas
 import app.crud.crud as crud
 from app.core.database import get_db
 from app.schemas.schemas import PaginatedResponse
+from app.api.auth import get_current_user
 
 router = APIRouter(prefix="/learning-paths", tags=["learning-paths"])
 
@@ -52,9 +53,10 @@ def delete_learning_path(learning_path_id: int, db: Session = Depends(get_db)):
 @router.post("/{learning_path_id}/register", response_model=schemas.UserLearningPathResponse)
 def register_user_to_learning_path(
     learning_path_id: int,
-    user_id: int = Body(..., embed=True, description="User ID to register"),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
 ):
+    user_id = current_user.id
     # Check if already registered
     existing = db.query(models.UserLearningPath).filter_by(user_id=user_id, learning_path_id=learning_path_id).first()
     if existing:
@@ -63,10 +65,6 @@ def register_user_to_learning_path(
     lp = db.query(models.LearningPath).filter_by(id=learning_path_id).first()
     if not lp:
         raise HTTPException(status_code=404, detail="Learning path not found")
-    # Check if user exists
-    user = db.query(models.User).filter_by(id=user_id).first()
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
     # Register
     ulp = models.UserLearningPath(user_id=user_id, learning_path_id=learning_path_id)
     db.add(ulp)

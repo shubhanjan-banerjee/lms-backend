@@ -23,3 +23,9 @@ logging.basicConfig(
 )
 
 logger = logging.getLogger('lms-backend')
+
+def get_logger(name: str) -> logging.Logger:
+    """
+    Get a logger with the specified name.
+    """
+    return logging.getLogger(f'lms-backend.{name}')
