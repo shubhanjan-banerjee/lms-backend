@@ -8,6 +8,8 @@ from app.core.logger import get_logger
 from langchain_google_genai import ChatGoogleGenerativeAI
 import os
 
+from app.ai.database_agent import run_agent_query
+
 router = APIRouter(prefix="/ai", tags=["AI Chat"])
 
 class ChatRequest(BaseModel):
@@ -35,6 +37,7 @@ def setup_agent_and_check_db():
         )
         # Check DB access
         engine = get_mysql_engine()
+        
         inspector = inspect(engine)
         tables = inspector.get_table_names()
         if not tables:
@@ -52,7 +55,9 @@ def setup_agent_and_check_db():
         agent_memory_instance = None
 
 # Call setup on module load
-setup_agent_and_check_db()
+# setup_agent_and_check_db()
+
+# run_agent_query()
 
 def get_agent_with_memory():
     global agent_memory_instance

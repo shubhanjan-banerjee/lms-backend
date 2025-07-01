@@ -42,7 +42,11 @@ def get_mysql_engine():
     Returns a SQLAlchemy engine for MySQL with the configured DATABASE_URL.
     """
     try:
-        return engine
+        return create_engine(
+            DATABASE_URL, 
+            echo=True,
+            connect_args={"auth_plugin": "mysql_native_password"}
+        )
     except Exception as e:
         logger.error(f"Failed to create MySQL engine: {e}")
         raise
