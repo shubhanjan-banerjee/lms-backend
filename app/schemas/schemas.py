@@ -344,6 +344,13 @@ class UserResponse(BaseModel):
     class Config:
         from_attributes = True
 
+# --- Chatbot Schemas ---
+class ChatQuery(BaseModel):
+    query: str
+
+class ChatResponse(BaseModel):
+    answer: str
+
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     UserLearningPathResponse = 'UserLearningPathResponse'

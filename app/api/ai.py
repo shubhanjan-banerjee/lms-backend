@@ -55,7 +55,7 @@ def setup_agent_and_check_db():
         agent_memory_instance = None
 
 # Call setup on module load
-# setup_agent_and_check_db()
+setup_agent_and_check_db()
 
 # run_agent_query()
 
@@ -67,6 +67,8 @@ def get_agent_with_memory():
 def chat_with_ai(request: ChatRequest):
     agent_mem = get_agent_with_memory()
     try:
+        if not request.question or not request.question.strip():
+            raise HTTPException(status_code=400, detail="Question cannot be empty.")
         response = agent_mem.run(request.question)
         return ChatResponse(answer=response)
     except Exception as e:

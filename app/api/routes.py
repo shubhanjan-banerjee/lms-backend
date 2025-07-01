@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from app.api import ai, auth, courses, health, learning_paths, proficiency_levels, project_roles, role_skill_requirements, skills, users, userupload
+from app.api import ai, auth, courses, health, learning_paths, proficiency_levels, project_roles, role_skill_requirements, skills, users, userupload, chatbot
 
 router = APIRouter()
 
@@ -15,4 +15,5 @@ router.include_router(proficiency_levels.router)
 router.include_router(project_roles.router)
 router.include_router(role_skill_requirements.router)
 router.include_router(userupload.router)
+router.include_router(chatbot.router)
 

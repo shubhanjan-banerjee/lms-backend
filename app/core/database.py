@@ -10,8 +10,7 @@ logger.debug("Create all database tables with error handling")
 
 engine = create_engine(
     DATABASE_URL, 
-    echo=True,
-    connect_args={"auth_plugin": "mysql_native_password"}
+    echo=True
 )
 
 # Add SQL logging handler for more verbose output
@@ -44,8 +43,7 @@ def get_mysql_engine():
     try:
         return create_engine(
             DATABASE_URL, 
-            echo=True,
-            connect_args={"auth_plugin": "mysql_native_password"}
+            echo=True
         )
     except Exception as e:
         logger.error(f"Failed to create MySQL engine: {e}")
