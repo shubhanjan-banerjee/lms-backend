@@ -129,3 +129,16 @@ async def refresh_access_token(
     except Exception as e:
         logger.error(f"Unexpected error during token refresh: {e}")
         raise credentials_exception
+
+@router.post("/register", response_model=schemas.UserResponse)
+async def register_user(user: schemas.UserCreate, db: Annotated[Session, Depends(get_db)]):
+    existing_user = crud.get_user_by_sso_id(db, sso_id=user.sso_id)
+    if existing_user:
+        raise HTTPException(status_code=400, detail="SSO ID already registered")
+    created_user = crud.create_user(db=db, user=user)
+    # Prepare response (exclude password)
+    user_dict = created_user.__dict__.copy()
+    user_dict.pop("hashed_password", None)
+    user_dict["user_skills"] = []
+    user_dict["current_project_role"] = None
+    return schemas.UserResponse(**user_dict)

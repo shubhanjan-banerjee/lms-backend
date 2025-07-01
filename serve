@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+# Universal shortcut to start the FastAPI server
+uv run uvicorn app.main:app --reload

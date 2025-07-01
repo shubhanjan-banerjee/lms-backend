@@ -5,13 +5,13 @@ from app.core.logger import logger
 from app.core.db_check import check_database_connectivity
 from sqlalchemy.engine.url import make_url
 from app.api.routes import router as api_router
-from app.api.health import router as health_router
+from app.api import chatbot
 from fastapi.middleware.cors import CORSMiddleware
 
 logger.debug("Starting LMS Backend API initialization...")
 
 # Create all database tables with error handling
-create_all_tables(engine, Base)
+# create_all_tables(engine, Base)
 
 # Check database connectivity at startup
 check_database_connectivity()
@@ -38,8 +38,8 @@ app.add_middleware(
 )
 
 logger.debug("Including API routers...")
-app.include_router(health_router)
 app.include_router(api_router)
+app.include_router(chatbot.router, prefix="/chatbot", tags=["Chatbot"])
 logger.debug("All routers included.")
 
 def start():

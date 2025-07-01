@@ -1,6 +1,17 @@
 from pydantic import BaseModel, EmailStr
-from typing import List, Optional
+from typing import List, Optional, TYPE_CHECKING, ForwardRef
 from datetime import datetime
+from typing import Generic, TypeVar, List, Optional
+from pydantic.generics import GenericModel
+
+UserLearningPathResponse = ForwardRef('UserLearningPathResponse')
+UserCourseProgressResponse = ForwardRef('UserCourseProgressResponse')
+
+T = TypeVar("T")
+
+class PaginatedResponse(GenericModel, Generic[T]):
+    total: int
+    items: List[T]
 
 class Token(BaseModel):
     access_token: str
@@ -204,14 +215,19 @@ class RoleSkillRequirementResponse(RoleSkillRequirementBase):
     class Config:
         from_attributes = True
 
-class UserResponse(UserCreate):
+class UserResponse(BaseModel):
     id: int
     sso_id: str
+    email: EmailStr
+    first_name: str
+    last_name: str
     role: str
     current_project_role: Optional[ProjectRoleResponse] = None
     date_joined: datetime
     last_login: Optional[datetime] = None
     user_skills: List[UserSkillResponse] = []
+    user_learning_paths: List[UserLearningPathResponse] = []
+    user_course_progress: List[UserCourseProgressResponse] = []
     class Config:
         from_attributes = True
 
@@ -304,3 +320,38 @@ class RoleSkillSwapSuggestion(BaseModel):
     employee_b_current_role: str
     suggested_swap_benefit: str
     skill_gaps_reduced: List[str]
+
+class UserSkillDisplay(BaseModel):
+    skill_id: int
+    skill_name: str
+    proficiency_level_id: int
+    proficiency_level_name: str
+    id: int
+
+class UserResponse(BaseModel):
+    id: int
+    sso_id: str
+    email: EmailStr
+    first_name: str
+    last_name: str
+    role: str
+    current_project_role: Optional[ProjectRoleResponse] = None
+    date_joined: datetime
+    last_login: Optional[datetime] = None
+    user_skills: List[UserSkillDisplay] = []
+    user_learning_paths: List['UserLearningPathResponse'] = []
+    user_course_progress: List['UserCourseProgressResponse'] = []
+    class Config:
+        from_attributes = True
+
+# --- Chatbot Schemas ---
+class ChatQuery(BaseModel):
+    query: str
+
+class ChatResponse(BaseModel):
+    answer: str
+
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    UserLearningPathResponse = 'UserLearningPathResponse'
+    UserCourseProgressResponse = 'UserCourseProgressResponse'

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from typing import List, Annotated
 import app.models.models as models
@@ -7,6 +7,8 @@ import app.crud.crud as crud
 from app.api.auth import get_current_admin_user
 from app.core.database import get_db
 import logging
+from fastapi.responses import JSONResponse
+from app.schemas.schemas import PaginatedResponse
 
 logger = logging.getLogger("lms_backend.api.skills")
 
@@ -26,6 +28,19 @@ async def get_skills(
     except Exception as e:
         logger.error(f"Error fetching skills: {e}")
         raise
+
+@router.get("/", response_model=PaginatedResponse[schemas.SkillResponse])
+def get_skills(
+    skip: int = 0,
+    limit: int = 100,
+    search: str = Query(None, description="Search by skill name or description"),
+    sort_by: str = Query("id", description="Sort by field name"),
+    sort_order: str = Query("asc", description="Sort order: asc or desc"),
+    db: Session = Depends(get_db)
+):
+    total = crud.count_skills(db, search=search)
+    items = crud.get_skills(db, skip=skip, limit=limit, search=search, sort_by=sort_by, sort_order=sort_order)
+    return {"total": total, "items": items}
 
 @router.post("/", response_model=schemas.SkillResponse)
 async def create_skill(
